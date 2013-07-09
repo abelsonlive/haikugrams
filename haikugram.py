@@ -24,6 +24,8 @@ def detect_potential_haiku(tweet):
     if re.search(r'@|#|MT|RT|[0-9]+', tweet):
         return None
 
+    tweet = re.sub("&", "and", tweet)
+
     # remove punctuation
     tweet = tweet.translate(string.maketrans("",""), string.punctuation)
 
