@@ -3,7 +3,7 @@ haikugrams
 
 # About:
 
-you've seen [haikubots](http://ohhaikubot.tumblr.com/) on tumblr, you've seem [anagram bots](http://twitter.com/anagramatron) on twitter. 
+you've seen [haikubots](http://ohhaikubot.tumblr.com/) on tumblr, you've seem [anagram bots](http://twitter.com/anagramatron) on twitter. I want to find haikus are anagrams of eachother. help me out! 
 
 _searching for those rarest of birds_
 ## install
