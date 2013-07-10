@@ -3,7 +3,7 @@ haikugrams
 
 # About:
 
-you've seen haikubots on twitter, you've seem anagram bots on twitter, 
+you've seen [haikubots](http://ohhaikubot.tumblr.com/) on tumblr, you've seem [anagram bots](http://twitter.com/anagramatron) on twitter. 
 
 _searching for those rarest of birds_
 ## install
