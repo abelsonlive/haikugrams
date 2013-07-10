@@ -261,4 +261,3 @@ if __name__ == '__main__':
     tmbl_api = connect_to_tumblr()
 
     main(twt_api, tmbl_api)
-
