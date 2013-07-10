@@ -179,8 +179,10 @@ def connect_to_tumblr(conf='haikugrams_tumblr.yml'):
 def format_tumble(haiku):
     haiku_text = re.sub(" / ", " <br></br> ", haiku['haiku_text'])
     url = "http://twitter.com/%s/status/%s" % (haiku['user'], haiku['status_id'])
-    embdded_tweet = '''<p><a href=%s target="_blank"> %s</a> </p><br></br><blockquote class="twitter-tweet"><p> <a href="%s"> original tweet </a></blockquote>
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>''' % (url, haiku_text, haiku_text, url)
+    embdded_tweet = '''<p> <a href=%s target="_blank"> %s</a> </p>
+                       <br></br>
+                       <blockquote class="twitter-tweet"><p> <a href="%s"> original tweet </a></blockquote>
+                       <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>''' % (url, haiku_text, url)
     return {
         'body': embdded_tweet,
         'url': url
