@@ -1,7 +1,10 @@
 haikugrams
 ==========
-
 _searching for those rarest of birds_
+# About:
+
+you've seen [haikubots](http://ohhaikubot.tumblr.com/) on tumblr, you've seem [anagram bots](http://twitter.com/anagramatron) on twitter. I want to find haikus that are anagrams of eachother. help me out! 
+
 ## install
 ```
 git clone https://github.com/abelsonlive/haikugrams.git
