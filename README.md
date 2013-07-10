@@ -1,6 +1,10 @@
 haikugrams
 ==========
 
+# About:
+
+you've seen haikubots on twitter, you've seem anagram bots on twitter, 
+
 _searching for those rarest of birds_
 ## install
 ```
