@@ -241,7 +241,7 @@ def main(twt_api, tmbl_api):
         # announce progres on twitter
         if n_haikus > 0:
             try:
-                twt_api.update_status("i've found %d haikus so far, but no haikugrams yet" % n_haikus)
+                twt_api.update_status("i've found %d haikus so far, but no haikugrams yet - http://haikugrams.tumblr.com" % n_haikus)
             except tweepy.error.TweepError as e:
                 print e
 
