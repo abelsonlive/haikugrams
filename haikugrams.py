@@ -206,7 +206,10 @@ def main(twt_api, tmbl_api):
     haikus = []
     for line in f.readlines():
         if line != "" and line !=" ":
-            haikus.append(json.loads(line))
+ 	    try:
+            	haikus.append(json.loads(line))
+	    except:
+		continue
     f.close()
     print "\tread in %d haikus" % len(haikus)
     # find some tweets
