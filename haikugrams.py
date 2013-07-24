@@ -143,7 +143,7 @@ def fetch_new_tweets(api):
     print "\tscraping twitter feed..."
     words = nltk.corpus.stopwords.words('english')
     tweets = []
-    for page in range(1, 150):
+    for page in range(1, 180):
         word = random.choice(words)
         try:
             print "\tsearching for %s..." % word
@@ -153,6 +153,21 @@ def fetch_new_tweets(api):
         else:
             tweets.extend(tweet_list)
     return tweets
+
+def post_tweets(api, haikus, hg=False):
+    for h in haikus:
+        if hg:
+            print "\tposting HG tweet!"
+        else:
+            print "\tposting tweet!"
+        haiku = h['haiku_text']
+        url = "http://www.twitter.com/%s/status/%s" % ( h['user'], h['status_id'] )
+        if hg:
+            haiku = "HG: "+ haiku
+        try:
+            api.update_status(haiku + " - " + url)
+        except tweepy.TweepError:
+            continue
 
 def connect_to_tumblr(conf='haikugrams_tumblr.yml'):
     c = yaml.safe_load(open(conf).read())
@@ -181,21 +196,6 @@ def post_tumbles(api, haikus, conf='haikugrams_tumblr.yml'):
             print e
         time.sleep(2)
 
-def post_tweets(api, haikus, hg=False):
-    for h in haikus:
-        if hg:
-            print "\tposting HG tweet!"
-        else:
-            print "\tposting tweet!"
-        haiku = h['haiku_text']
-        url = "http://www.twitter.com/%s/status/%s" % ( h['user'], h['status_id'] )
-        if hg:
-            haiku = "HG: "+ haiku
-        try:
-            api.update_status(haiku + " - " + url)
-        except tweepy.TweepError:
-            continue
-
 def main(twt_api, tmbl_api):
 
     # open up and read in our haiku database
@@ -208,6 +208,19 @@ def main(twt_api, tmbl_api):
             except:
                 continue
     print "\tread in %d haikus" % len(haikus)
+    
+
+    lines = open('haikugrams.json', "r").read().split("\n")
+    haikugrams = []
+    for line in lines:
+        if line != "" and line !=" ":
+            try:
+                haikugrams.append(json.loads(line))
+            except:
+                continue
+    print "\tread in %d haikugrams" % len(haikugrams)
+    # open up and read in our haikugrams databse:
+
     # find some tweets
     tweets = fetch_new_tweets(api=twt_api)
     new_haikus = detect_haikus(tweets)
@@ -223,14 +236,20 @@ def main(twt_api, tmbl_api):
         post_tumbles(api=tmbl_api, haikus=new_haikus)
         post_tweets(api=twt_api, haikus=new_haikus)
 
-    # how many haikus do we have now?
-    n_haikus = len(haikus)
 
+    # find haikugrams
     hgs = detect_haikugrams(haikus)
+    current_hg_ids = [h['status_id'] for h in haikugrams]
+    new_hgs = [h for h in hgs if h['status_id'] not in current_hg_ids]
 
-    if len(hgs) > 1:
+    if len(new_hgs ) > 1:
+        f = open('haikugrams.json', "a")
+        for h in new_hgs:
+            f.write(json.dumps(h)+"\n")
+        f.close()
+
         # alert that we have found a haikugram!
-        post_tweets(api=twt_api, haikus=hgs, hg=True)
+        post_tweets(api=twt_api, haikus=new_hgs , hg=True)
 
     else:
         print "no haikugrams"
