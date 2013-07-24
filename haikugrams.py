@@ -85,9 +85,9 @@ def format_haiku(haiku_dict):
     haiku = ''
     for i, word in enumerate(words):
         if syllable_count == 5:
-            haiku = haiku + " / "
+            haiku = haiku + "\r\n"
         if syllable_count == 12:
-            haiku = haiku + " / "
+            haiku = haiku + "\r\n"
         syllable_count = syllable_count + syllables[i]
         haiku += word.strip() + " "
     return haiku.strip()
@@ -250,7 +250,6 @@ def main(twt_api, tmbl_api):
 
         # alert that we have found a haikugram!
         post_tweets(api=twt_api, haikus=new_hgs , hg=True)
-
     else:
         print "no haikugrams"
 
