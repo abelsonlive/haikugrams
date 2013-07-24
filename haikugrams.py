@@ -3,6 +3,7 @@ import nltk
 import tweepy
 import pytumblr
 import re, time, string, random, json, yaml
+from collections import defaultdict
 
 # initialize carnegie mellon dictionary
 d = cmudict.dict()
@@ -115,39 +116,20 @@ def detect_haikus(tweets):
     print "\tfound %d haikus..." % len(haikus)
     return haikus
 
-def extract_chars(text):
-    chars = [char.lower() for char in text if char is not " " and char is not "/"]
-    return "".join(sorted(chars))
+def extract_chars(h):
+    chars = [char.lower() for char in h if char!=" " and char!="/" and char!=""]
+    return "".join(sorted(chars)).strip()
 
-def is_anagram(tweet_one, tweet_two):
-    chars_one = extract_chars(tweet_one)
-    chars_two = extract_chars(tweet_two)
-    if chars_one == chars_two:
-        return True
-    else:
-        return False
+def detect_haikugrams(haikus):
+    text_to_test = [extract_chars(h['haiku_text']) for h in haikus]
+    dups = defaultdict(list)
+    for i,t in enumerate(text_to_test):
+        dups[t].append(haikus[i])
 
-def find_haikugrams(haikus):
-    haikugrams = []
-    for oh in haikus:
-        for nh in haikus:
-            # ignore statuses which are precisely the same
-            if nh['status_id'] == oh['status_id'] or nh['haiku_text'] == oh['haiku_text']:
-                continue
+    dupkus = [d for d in dups.values() if len(d)>1]
 
-            # otherwise try to find haikugrams
-            else:
-                if is_anagram(oh['haiku_text'], nh['haiku_text']):
-                    hg = {
-                    'haiku_one': oh,
-                    'haiku_two': nh
-                    }
-                    haiku_grams.append(hg)
-
-    if len(haikugrams) == 0:
-        return None
-    else:
-        return haikugrams
+    haikugrams = [dd for d in dupkus for dd in d if len(set([ddd['haiku_text'] for ddd in d]))>1]
+    return haikugrams
 
 def connect_to_twitter(conf="haikugrams_twitter.yml"):
     c = yaml.safe_load(open(conf).read())
@@ -161,7 +143,7 @@ def fetch_new_tweets(api):
     print "\tscraping twitter feed..."
     words = nltk.corpus.stopwords.words('english')
     tweets = []
-    for page in range(1, 180):
+    for page in range(1, 150):
         word = random.choice(words)
         try:
             print "\tsearching for %s..." % word
@@ -199,18 +181,32 @@ def post_tumbles(api, haikus, conf='haikugrams_tumblr.yml'):
             print e
         time.sleep(2)
 
+def post_tweets(api, haikus, hg=False):
+    for h in haikus:
+        if hg:
+            print "\tposting HG tweet!"
+        else:
+            print "\tposting tweet!"
+        haiku = h['haiku_text']
+        url = "http://www.twitter.com/%s/status/%s" % ( h['user'], h['status_id'] )
+        if hg:
+            haiku = "HG: "+ haiku
+        try:
+            api.update_status(haiku + " - " + url)
+        except tweepy.TweepError:
+            continue
+
 def main(twt_api, tmbl_api):
 
     # open up and read in our haiku database
-    f = open('haikus.json', "r")
+    lines = open('haikus.json', "r").read().split("\n")
     haikus = []
-    for line in f.readlines():
+    for line in lines:
         if line != "" and line !=" ":
- 	    try:
-            	haikus.append(json.loads(line))
-	    except:
-		continue
-    f.close()
+            try:
+                haikus.append(json.loads(line))
+            except:
+                continue
     print "\tread in %d haikus" % len(haikus)
     # find some tweets
     tweets = fetch_new_tweets(api=twt_api)
@@ -225,41 +221,19 @@ def main(twt_api, tmbl_api):
         haikus += new_haikus
 
         post_tumbles(api=tmbl_api, haikus=new_haikus)
+        post_tweets(api=twt_api, haikus=new_haikus)
 
     # how many haikus do we have now?
     n_haikus = len(haikus)
 
-    # try to find a haikugrams within our haiku set
-    print "\ntrying to find a haikugram within %d haikus" % n_haikus
-    haikugrams = find_haikugrams(haikus)
+    hgs = detect_haikugrams(haikus)
 
-    if haikugrams is None:
-
-        # alert that we havent found a haikugram
-        print "\tno haikugrams yet..."
-
-        # announce progres on twitter
-        if n_haikus > 0:
-            try:
-                twt_api.update_status("i've found %d haikus so far, but no haikugrams yet - http://haikugrams.tumblr.com" % n_haikus)
-            except tweepy.error.TweepError as e:
-                print e
+    if len(hgs) > 1:
+        # alert that we have found a haikugram!
+        post_tweets(api=twt_api, haikus=hgs, hg=True)
 
     else:
-        # alert that we have found a haikugram!
-        print "\tfound a haikugram!!!!!!!!!"
-
-        # append it to our list of haikugrams
-        f = open('haikugrams.json', "a")
-        for hg in haikugrams:
-            f.write(json.dumps(hg)+"\n")
-        f.close()
-
-        api.update_status("I've found a haikugram!!!!!")
-        time.sleep(5)
-        api.update_status(haikugrams[0]['haiku_one']['haiku_text'])
-        time.sleep(5)
-        api.update_status(haikugrams[0]['haiku_two']['haiku_text'])
+        print "no haikugrams"
 
 if __name__ == '__main__':
     twt_api = connect_to_twitter()
