@@ -90,7 +90,7 @@ def format_haiku(haiku_dict):
             haiku = haiku + "\r\n"
         syllable_count = syllable_count + syllables[i]
         haiku += word.strip() + " "
-    return haiku.strip()
+    return haiku.strip() + "\r\n"
 
 def detect_haikus(tweets):
     if len(tweets)==0:
@@ -174,7 +174,7 @@ def connect_to_tumblr(conf='haikugrams_tumblr.yml'):
     return pytumblr.TumblrRestClient(c['consumer_key'], c['consumer_secret'], c['oauth_token'], c['oauth_token_secret'])
 
 def format_tumble(haiku):
-    haiku_text = re.sub(" / ", " <br></br> ", haiku['haiku_text'])
+    haiku_text = re.sub("\r\n", " <br></br> ", haiku['haiku_text'])
     url = "http://twitter.com/%s/status/%s" % (haiku['user'], haiku['status_id'])
     embdded_tweet = '''<p> <a href=%s target="_blank"> %s</a> </p>
                        <br></br>
